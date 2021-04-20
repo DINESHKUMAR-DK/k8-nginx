@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('deploy k') {
+            steps {
+                sshagent(['tanzu']){
+                    sh "scp -o StrictHostKeyChecking=no nginx.yml -p tanzu tanzu@10.0.8.84:/home/tanzu/k8"
+                    script{
+                        try{
+                            sh "ssh tanzu@10.0.8.84 -p tanzu kubectl apply -f . "
+                        }
+                        catch(erorr){
+                            sh "ssh tanzu@10.0.8.84 -p tanzu kubectl create -f ."
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
